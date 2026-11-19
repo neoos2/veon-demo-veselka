@@ -1,0 +1,440 @@
+---
+import Base from "../layouts/Base.astro";
+import Section from "../components/Section.astro";
+import FutureLink from "../components/FutureLink.astro";
+import "../styles/home.css";
+import displayFont from "../assets/fonts/FixelDisplay-Bold.woff2?url";
+
+const SOON = "Розділ у розробці";
+const BOOKING = "Онлайн-запис з'явиться в повній версії сайту";
+
+const phones = {
+  main: { href: "tel:+380673432911", text: "067 343 29 11" },
+  second: { href: "tel:+380503432911", text: "050 343 29 11" },
+  home: { href: "tel:+380671051748", text: "067 105 17 48" },
+};
+// non-breaking spaces inside numbers so they never split
+const nb = (s: string) => s.replace(/ /g, " ");
+
+const nav = [
+  { href: "#routes", label: "Для кого" },
+  { href: "#checkup", label: "Check-up" },
+  { href: "#home-visit", label: "Лікар додому" },
+  { href: "#directions", label: "Напрямки і лікарі" },
+  { href: "#branches", label: "Філії" },
+];
+const maps = (q: string) => `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(q)}`;
+const weekHours = [
+  { d: "Пн–Сб", t: "8:00–20:00" },
+  { d: "Нд", t: "9:00–20:00" },
+];
+const branches = [
+  { id: "sykhiv", name: "Сихів", address: "пр. Червоної Калини, 68", city: "Львів", note: "Перша філія мережі, з 2015 року", hours: weekHours, h24: false },
+  { id: "pivdennyi", name: "Південний (ТВК)", address: "вул. Щирецька, 36", city: "Львів", hours: weekHours, h24: false },
+  { id: "chornovola", name: "Чорновола", address: "пр. Чорновола, 43а", city: "Львів", note: "Діагностика, хірургія, стаціонар, рентген і УЗД; відкрита 2022 року", hours: [], h24: true },
+  { id: "riasne", name: "Рясне", address: "вул. Професора Ковалика, 1а", city: "Львів", hours: weekHours, h24: false },
+  { id: "levandivka", name: "Левандівка", address: "вул. Широка, 68а", city: "Львів", hours: weekHours, h24: false },
+  { id: "novoiavorivsk", name: "Новояворівськ", address: "вул. Шептицького, 3", city: "Новояворівськ", note: "Єдина філія за межами Львова", hours: weekHours, h24: false },
+];
+
+const routes = [
+  {
+    key: "child", title: "Дитина",
+    items: ["Педіатрія", "Дитячі вузькі спеціалісти, 21 спеціальність", "Філія на Чорновола, 43а, працює цілодобово"],
+    price: { what: "Консультація педіатра", value: "1150 грн" }, more: "Педіатрія",
+  },
+  {
+    key: "pregnancy", title: "Вагітність і малюк",
+    items: ["Ведення вагітності", "Програма «Я народився» для малюка", "Вакцинація і патронаж новонароджених"],
+    price: { what: "Пренатальний скринінг", value: "4015 грн" }, more: "Програми для вагітних",
+  },
+  {
+    key: "adult", title: "Дорослий",
+    items: ["Сімейна медицина", "Дорослі вузькі спеціалісти, близько 27 спеціальностей", "Check-up і оперативні втручання"],
+    price: { what: "Консультація сімейного лікаря", value: "1150 грн" }, more: "Дорослим",
+  },
+  {
+    key: "declaration", title: "Сімейний лікар за декларацією",
+    items: ["Декларація з сімейним лікарем за програмою НСЗУ", "Інші послуги мережі — за цінами клініки"],
+    price: { what: "Сімейний лікар за декларацією", value: "безкоштовно" }, more: "Декларантам", cta: "Підписати декларацію",
+  },
+];
+
+const programs = [
+  { name: "Check-up «Уролог»", price: "2125 грн" },
+  { name: "Діагностика анемії", price: "2710 грн" },
+  { name: "Стоматологічний check-up", price: "2800 грн" },
+  { name: "Check-up «Здоров'я жінки»", price: "3240 грн" },
+  { name: "Пренатальний скринінг I триместру", price: "4015 грн" },
+  { name: "Контроль травлення", price: "4900 грн" },
+  { name: "Печінка та вага", price: "5820 грн" },
+  { name: "Програма «Я народився»", price: null },
+];
+
+const portraits = ["doctor-01", "doctor-02", "doctor-03", "doctor-04", "doctor-06", "doctor-07", "doctor-family", "doctor-cardio"];
+const portraitSize: Record<string, [number, number]> = {
+  "doctor-01": [404, 380], "doctor-02": [404, 400], "doctor-03": [404, 410], "doctor-04": [404, 450],
+  "doctor-06": [404, 470], "doctor-07": [404, 470], "doctor-family": [404, 390], "doctor-cardio": [404, 400],
+};
+
+const footerLinks = ["Про нас", "Документи", "Застосунок", "Блог", "Вакансії", "Моя медична карта", "Політика конфіденційності"];
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "MedicalClinic",
+  name: "Veselka",
+  telephone: "+380673432911",
+  email: "info@veselka.clinic",
+  medicalSpecialty: ["Pediatric", "PrimaryCare"],
+  department: branches.map((b) => ({
+    "@type": "MedicalClinic",
+    name: `Veselka, ${b.name}`,
+    telephone: "+380673432911",
+    address: { "@type": "PostalAddress", streetAddress: b.address, addressLocality: b.city, addressCountry: "UA" },
+    openingHours: b.h24 ? ["Mo-Su 00:00-23:59"] : ["Mo-Sa 08:00-20:00", "Su 09:00-20:00"],
+  })),
+};
+---
+<Base
+  lang="uk"
+  title="Медичний центр у Львові для дітей і дорослих | Veselka"
+  description="6 філій у Львові та Новояворівську, одна — цілодобово. Педіатрія, сімейна медицина, check-up з цінами, лікар додому. Тел. 067 343 29 11"
+>
+  <Fragment slot="head">
+    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin data-rec="SP-R04" />
+    <link rel="icon" href="img/logo.svg" type="image/svg+xml" />
+  </Fragment>
+
+  <header class="site-header" slot="header" data-rec="UX-R09">
+    <div class="container site-header__bar">
+      <a class="site-header__logo" href="#top" aria-label="Veselka, на початок сторінки">
+        <img src="img/logo.svg" alt="Veselka" width="140" height="36" />
+      </a>
+      <nav class="site-nav" aria-label="Розділи сторінки">
+        <ul>
+          {nav.map((n) => <li><a href={n.href}>{n.label}</a></li>)}
+          <li><FutureLink note={SOON}>Ціни</FutureLink></li>
+        </ul>
+      </nav>
+      <div class="site-header__actions">
+        <a class="site-header__phone num" href={phones.main.href} data-rec="UX-R01">{nb(phones.main.text)}</a>
+        <FutureLink note={BOOKING} class="site-header__book future-link--end">Онлайн-запис</FutureLink>
+        <a class="site-header__call" href={phones.main.href} aria-label={`Зателефонувати ${phones.main.text}`}>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.5 4-2 1.3a11 11 0 0 0 6.5 6.5l1.3-2 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"/></svg>
+        </a>
+        <details class="menu">
+          <summary aria-label="Меню">Меню</summary>
+          <div class="menu__panel">
+            <div class="container">
+              <ul>
+                <li><a href="#routes">Для кого</a></li>
+                <li><a href="#home-visit">Лікар додому</a></li>
+                <li><a href="#checkup">Check-up</a></li>
+                <li><a href="#directions">Напрямки і лікарі</a></li>
+                <li><a href="#branches">Філії</a></li>
+                <li><FutureLink note={SOON} class="future-link--start">Ціни</FutureLink></li>
+                <li><FutureLink note={SOON} class="future-link--start">Декларантам</FutureLink></li>
+              </ul>
+              <div class="menu__contact">
+                <a class="btn" href={phones.main.href}>Зателефонувати <span class="num">{nb(phones.main.text)}</span></a>
+                <a class="btn btn--ghost" href={phones.home.href}>Лікар додому <span class="num">{nb(phones.home.text)}</span></a>
+              </div>
+            </div>
+          </div>
+        </details>
+      </div>
+    </div>
+  </header>
+
+  <Section id="hero" class="hero" rec="UX-R02,SP-R01,GA-R002,MA-R002" label="Перший екран">
+    <svg class="hero__quarter" viewBox="0 0 148 148" aria-hidden="true" focusable="false">
+      <circle class="q1 arc-m" cx="148" cy="0" r="140" />
+      <circle class="q2 arc-m" cx="148" cy="0" r="114" />
+      <circle class="q3 arc-m" cx="148" cy="0" r="90" />
+      <circle class="q4 arc-m" cx="148" cy="0" r="68" />
+    </svg>
+    <div class="container hero__grid">
+      <div class="hero__text">
+        <h1><span class="l">Медичний центр</span> <span class="l">у Львові для дітей</span> <span class="l">і дорослих</span></h1>
+        <p class="hero__lead">6 філій у Львові та Новояворівську, одна з них, <strong>на Чорновола, 43а, працює цілодобово</strong>.</p>
+        <div class="hero__actions">
+          <a class="btn btn--number" href={phones.main.href} data-rec="UX-R01,GA-R001,SM-R006">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.5 4-2 1.3a11 11 0 0 0 6.5 6.5l1.3-2 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"/></svg>
+            <span class="btn__stack"><span class="btn__cap">Зателефонувати</span><span class="btn__big">{nb(phones.main.text)}</span></span>
+          </a>
+          <FutureLink note={BOOKING} class="future-link--start">Онлайн-запис</FutureLink>
+          <div class="hero__visit" data-rec="UX-R08">
+            <p class="hero__visit-text"><b>Лікар додому</b><span>Львів — <span class="num">4000&nbsp;грн</span></span></p>
+            <a class="btn btn--deep" href={phones.home.href} aria-label={`Викликати лікаря додому: ${phones.home.text}`}><span class="num">{nb(phones.home.text)}</span></a>
+          </div>
+        </div>
+      </div>
+      <figure class="hero__arch">
+        <span class="arch arch--well arc-d" style="--i:2" aria-hidden="true"></span>
+        <span class="arch arch--deep arc-d" style="--i:1" aria-hidden="true"></span>
+        <span class="arch arch--field arc-d" style="--i:0" aria-hidden="true"></span>
+        <picture class="arch__photo">
+          <source media="(max-width: 59.99rem)" srcset="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" />
+          <img src="img/doctor-office.webp" srcset="img/doctor-office-640.webp 640w, img/doctor-office.webp 1280w" sizes="(min-width: 60rem) 960px, 1px" width="1280" height="720" alt="Лікар клініки Veselka у кабінеті з рентгенівськими знімками" fetchpriority="high" decoding="async" />
+        </picture>
+      </figure>
+    </div>
+  </Section>
+
+  <Section id="routes" class="routes" rec="UX-R04,C-BR003,GA-R005" label="Для кого">
+    <div class="container">
+      <div class="routes__head">
+        <h2>Одна веселка над усією родиною</h2>
+        <p class="lead">Дітей і дорослих приймають в одній мережі. Оберіть свій маршрут: ціна-орієнтир і номер поруч.</p>
+      </div>
+      <picture class="routes__photo">
+        <img src="img/doctor-office-640.webp" width="640" height="360" alt="Лікар клініки Veselka у кабінеті" loading="lazy" decoding="async" />
+      </picture>
+      <div class="routes__body" data-routes>
+        <figure class="routes__schema">
+          <svg viewBox="0 0 440 236" role="img" aria-labelledby="schema-title" aria-describedby="schema-desc">
+            <title id="schema-title">Схема чотирьох маршрутів пацієнта</title>
+            <desc id="schema-desc">Усередині вагітність і малюк, далі дитина, дорослий, а зовнішня дуга — сімейний лікар за декларацією.</desc>
+            <path class="arc arc--declaration" d="M 26 226 A 194 194 0 0 1 414 226" />
+            <path class="arc arc--adult" d="M 70 226 A 150 150 0 0 1 370 226" />
+            <path class="arc arc--child" d="M 114 226 A 106 106 0 0 1 326 226" />
+            <path class="arc arc--pregnancy" d="M 158 226 A 62 62 0 0 1 282 226" />
+          </svg>
+          <figcaption>Кожна дуга — маршрут. Наведіть або торкніться рядка, щоб побачити його місце.</figcaption>
+          <div class="routes__help">
+            <p><b>Не знаєте, з чого почати?</b> Контакт-центр підкаже лікаря і найближчу філію.</p>
+            <a class="btn btn--ghost" href={phones.main.href} aria-label={`Зателефонувати ${phones.main.text}`}><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.5 4-2 1.3a11 11 0 0 0 6.5 6.5l1.3-2 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"/></svg><span class="num">{nb(phones.main.text)}</span></a>
+          </div>
+        </figure>
+        <ol class="routes__list">
+          {routes.map((r) => (
+            <li class={`route route--${r.key}`} data-route={r.key} id={`route-${r.key}`}>
+              <h3><svg class={`route__mark route__mark--${r.key}`} viewBox="0 0 32 18" aria-hidden="true"><path d="M 3 17 A 13 13 0 0 1 29 17" /></svg>{r.title}</h3>
+              <ul class="route__items">{r.items.map((i) => <li>{i}</li>)}</ul>
+              <div class="route__offer">
+              <p class="route__price"><span>{r.price.what}</span> <b class="num">{r.price.value}</b></p>
+              <p class="route__actions">
+                <a class="link" href={phones.main.href}>{`${r.cta ?? "Записатися"}: `}<span class="num">{nb(phones.main.text)}</span></a>
+                <FutureLink note={SOON} class="future-link--start">{r.more}</FutureLink>
+              </p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </Section>
+
+  <Section id="home-visit" class="visit" rec="UX-R08" label="Лікар додому">
+    <div class="container visit__grid">
+      <div class="visit__head">
+        <h2>Лікар приїде додому</h2>
+        <p class="lead">Виклик лікаря додому приймає окремий номер.</p>
+        <a class="btn btn--deep btn--huge" href={phones.home.href}>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.5 4-2 1.3a11 11 0 0 0 6.5 6.5l1.3-2 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"/></svg>
+          <span class="btn__stack"><span class="btn__cap">Викликати лікаря</span><span class="btn__big">{nb(phones.home.text)}</span></span>
+        </a>
+      </div>
+      <table class="visit__table">
+        <caption class="visually-hidden">Вартість виклику лікаря додому</caption>
+        <thead><tr><th scope="col">Куди</th><th scope="col">Вартість</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Львів, у межах міста</th><td class="num">4000&nbsp;грн</td></tr>
+          <tr><th scope="row">За місто, до 20 км</th><td class="num">5000&nbsp;грн</td></tr>
+          <tr><th scope="row">Новояворівськ</th><td class="num">3000&nbsp;грн</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </Section>
+
+  <Section id="checkup" class="checkup" rec="UX-R06,UX-R04" label="Check-up">
+    <div class="container checkup__grid">
+      <div class="checkup__lead">
+        <h2>Check-up з цінами на виду</h2>
+        <div class="checkup__main">
+          <h3>Універсальний check-up</h3>
+          <p class="checkup__figure num">2500<span>&nbsp;грн</span></p>
+        </div>
+        <p class="checkup__actions">
+          <a class="btn btn--ghost" href={phones.main.href}>Записатися на check-up</a>
+          <FutureLink note={SOON} class="future-link--start">Усі 36 програм</FutureLink>
+        </p>
+      </div>
+      <ul class="checkup__list">
+        {programs.map((p, i) => (
+          <li data-reveal style={`--reveal-delay:${Math.min(i, 6) * 40}ms`}>
+            <details class="program">
+              <summary>
+                <span class="program__name">{p.name}</span>
+                {p.price ? <span class="program__price num">{p.price.replace(" ", " ")}</span> : <span class="program__price program__price--ask">ціну назве контакт-центр</span>}
+                <svg class="program__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+              </summary>
+              <div class="program__body">
+                <p>Склад програми і підготовку пояснить контакт-центр: <a class="link num" href={phones.main.href}>{nb(phones.main.text)}</a>.</p>
+                <FutureLink note={SOON} class="future-link--start">Опис програми</FutureLink>
+              </div>
+            </details>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Section>
+
+  <Section id="directions" class="directions" label="Напрямки і лікарі">
+    <div class="container">
+      <div class="directions__grid">
+        <div class="directions__main">
+          <h2>10 напрямків для всієї родини</h2>
+          <div class="tabs" data-tabs>
+            <div class="tabs__list" role="tablist" aria-label="Напрямки за віком">
+              <button type="button" role="tab" id="tab-kids" aria-controls="panel-kids" aria-selected="true">Дітям</button>
+              <button type="button" role="tab" id="tab-adults" aria-controls="panel-adults" aria-selected="false" tabindex="-1">Дорослим</button>
+            </div>
+            <div class="tabs__panel" role="tabpanel" id="panel-kids" aria-labelledby="tab-kids">
+              <h3 class="tabs__nojs">Дітям</h3>
+              <ul class="dir-big">
+                <li><b>Педіатрія</b><span>Консультація педіатра — <span class="num">1150&nbsp;грн</span></span></li>
+                <li><b>Дитячі вузькі спеціалісти</b><span>21 спеціальність</span></li>
+              </ul>
+            </div>
+            <div class="tabs__panel" role="tabpanel" id="panel-adults" aria-labelledby="tab-adults">
+              <h3 class="tabs__nojs">Дорослим</h3>
+              <ul class="dir-big">
+                <li><b>Сімейна медицина</b><span>Консультація сімейного лікаря — <span class="num">1150&nbsp;грн</span></span></li>
+                <li><b>Дорослі вузькі спеціалісти</b><span>Близько 27 спеціальностей</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="directions__more">
+          <h3>Також у мережі</h3>
+          <ul class="dir-list">
+            <li><b>Діагностика</b> лабораторна, УЗД, ендоскопія, функціональна, аудіометрія</li>
+            <li><b>Оперативні втручання</b> хірургія, ортопедія і травматологія, гінекологія, урологія, ЛОР, реконструктивна мамологія</li>
+            <li><b>Імунопрофілактика</b></li>
+            <li><b>Рентгенографія</b></li>
+            <li><b>Фізична реабілітація</b></li>
+            <li><b>Стоматологія</b></li>
+          </ul>
+          <p class="directions__links">
+            <FutureLink note={SOON} class="future-link--start">Сторінки напрямків</FutureLink>
+          </p>
+        </div>
+      </div>
+      <figure class="doctors">
+        <ul class="doctors__strip">
+          {portraits.map((d) => (
+            <li><img src={`img/${d}.webp`} width={portraitSize[d][0]} height={portraitSize[d][1]} alt="" loading="lazy" decoding="async" /></li>
+          ))}
+        </ul>
+        <figcaption class="doctors__caption">
+          <span><b>Лікарі мережі Veselka.</b> За даними клініки, у мережі понад 350 лікарів.</span>
+          <span class="doctors__actions">
+            <FutureLink note={SOON} class="future-link--start">Знайти лікаря</FutureLink>
+            <a class="link" href={phones.main.href}>{"Підібрати лікаря телефоном: "}<span class="num">{nb(phones.main.text)}</span></a>
+          </span>
+        </figcaption>
+      </figure>
+    </div>
+  </Section>
+
+  <Section id="care-path" class="care" label="Маршрут пацієнта">
+    <div class="container">
+      <div class="care__well">
+        <h2 class="care__statement">Консультація, власна лабораторія, лікування й ліки — в одній мережі</h2>
+        <ol class="care__path">
+          <li>Консультація</li>
+          <li>Власна лабораторія</li>
+          <li>Лікування</li>
+          <li>Медикаменти</li>
+        </ol>
+        <div class="care__facts">
+          <p>Мережа виросла з першої приватної дитячої поліклініки Львова, яка відкрилася у <span class="num">2015</span> році на Сихові. Сьогодні тут лікують і дітей, і дорослих.</p>
+          <p>За даними клініки: понад <b class="num">396&nbsp;000</b> пацієнтів, <b class="num">350+</b> лікарів і <b class="num">32&nbsp;000+</b> медичних послуг щомісяця. На doc.ua рейтинг мережі <b class="num">5,0</b> за <span class="num">1482</span> відгуками (станом на <time datetime="2026-11-19">19.11.2026</time>).</p>
+        </div>
+      </div>
+    </div>
+  </Section>
+
+  <Section id="branches" class="branches" rec="UX-R07" label="Філії">
+    <div class="container">
+      <div class="branches__head">
+        <h2>Шість філій, одна працює цілодобово</h2>
+        <p class="lead">Номер для всіх філій один: контакт-центр <a class="link num" href={phones.main.href}>{nb(phones.main.text)}</a>.</p>
+      </div>
+      <ul class="branches__list" data-branches>
+        {branches.map((b, i) => (
+          <li data-reveal style={`--reveal-delay:${i * 40}ms`}>
+            <details class:list={["branch", { "branch--h24": b.h24 }]} open>
+              <summary class="branch__sum">
+                <h3 class="branch__name">{b.name}</h3>
+                {b.h24
+                  ? <span class="branch__hours"><span class="branch__tag">Цілодобово</span></span>
+                  : <span class="branch__hours num">{b.hours.map((h) => <span>{h.d} {h.t}</span>)}</span>}
+                <svg class="branch__chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+              </summary>
+              <div class="branch__body">
+                <p class="branch__addr">{b.city}, {b.address}{b.note && <span class="branch__note">{b.note}</span>}<FutureLink note={SOON} class="future-link--start branch__doctors">Лікарі філії</FutureLink></p>
+                <p class="branch__actions">
+                  <a class="btn btn--ghost btn--sm" href={maps(`${b.city}, ${b.address}`)} target="_blank" rel="noopener">
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-6.5-6.2-6.5-11a6.5 6.5 0 0 1 13 0c0 4.8-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></svg>
+                    Маршрут<span class="visually-hidden"> до філії {b.name} (Google Maps, нова вкладка)</span>
+                  </a>
+                  <a class="btn btn--ghost btn--sm" href={phones.main.href}>
+                    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.5 4-2 1.3a11 11 0 0 0 6.5 6.5l1.3-2 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"/></svg>
+                    Зателефонувати
+                  </a>
+                </p>
+              </div>
+            </details>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </Section>
+
+  <Section id="contacts" class="contacts" rec="UX-R01" label="Контакти">
+    <div class="container contacts__grid">
+      <div class="contacts__head">
+        <h2>Запишіться за телефоном</h2>
+        <p class="lead">Контакт-центр запише до потрібного лікаря і підкаже найближчу філію.</p>
+        <FutureLink note={BOOKING} class="future-link--start">Онлайн-запис</FutureLink>
+      </div>
+      <dl class="contacts__list">
+        <div><dt>Контакт-центр</dt><dd><a href={phones.main.href} class="num">{nb(phones.main.text)}</a><span aria-hidden="true"> · </span><a href={phones.second.href} class="num">{nb(phones.second.text)}</a></dd></div>
+        <div><dt>Лікар додому</dt><dd><a href={phones.home.href} class="num">{nb(phones.home.text)}</a></dd></div>
+        <div><dt>Корпоративним клієнтам</dt><dd><a href="tel:+380966523020" class="num">{nb("096 652 30 20")}</a></dd></div>
+        <div><dt>Пошта</dt><dd><a href="mailto:info@veselka.clinic" class="contacts__mail">info@veselka.clinic</a></dd></div>
+      </dl>
+    </div>
+  </Section>
+
+  <footer class="site-footer" slot="footer">
+    <div class="container site-footer__grid">
+      <ul class="site-footer__social" aria-label="Veselka у соцмережах">
+        <li><a href="https://www.instagram.com/veselka.clinic/" rel="noopener" target="_blank">Instagram</a></li>
+        <li><a href="https://www.facebook.com/veselka.clinic" rel="noopener" target="_blank">Facebook</a></li>
+        <li><a href="https://www.youtube.com/@veselka.clinic" rel="noopener" target="_blank">YouTube</a></li>
+        <li><a href="https://www.tiktok.com/@veselka.clinic" rel="noopener" target="_blank">TikTok</a></li>
+      </ul>
+      <ul class="site-footer__links">
+        {footerLinks.map((l) => <li><FutureLink note={SOON} class="future-link--start">{l}</FutureLink></li>)}
+      </ul>
+      <p class="site-footer__legal">© 2015 – 2026 ТзОВ «Повноділ»</p>
+    </div>
+  </footer>
+
+  <nav class="callbar" slot="footer" aria-label="Швидкий зв'язок" data-rec="UX-R11" data-callbar>
+    <a class="callbar__btn" href={phones.main.href}>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 3.5h2.6l1.5 4-2 1.3a11 11 0 0 0 6.5 6.5l1.3-2 4 1.5v2.6a2 2 0 0 1-2.2 2A16.5 16.5 0 0 1 4.6 5.7a2 2 0 0 1 2-2.2Z"/></svg>
+      Зателефонувати
+    </a>
+    <a class="callbar__btn callbar__btn--home" href={phones.home.href}>
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11l8-6.5 8 6.5M6 9.5V20h12V9.5"/></svg>
+      Лікар додому
+    </a>
+  </nav>
+
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} slot="footer" />
+  <script src="../scripts/home.ts"></script>
+</Base>

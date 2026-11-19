@@ -1,0 +1,101 @@
+/* Hallmark · shape: custom, arc-led family page (job-first: action, menu with prices, urgent service, hours and addresses, close) · genre: editorial · theme: custom · job: book · idea: "Дуги знака Veselka стають системою сторінки: кожна дуга — вік і маршрут пацієнта під одним знаком" · vibe: "тепла, точна, сімейна медицина без стерильності"
+ * paper: #F8FBFB · accent: #006B79 · display: Fixel Display · body: Fixel Text · hero: stage, H1 and the number button on the left 7 columns, four concentric arches of the logo bleeding off the right edge with the clinic doctor in the inner arch window; phone: one quarter arc in the corner, no photo · nav: edge-aligned sticky solid bar, logo, 6 task links, phone as text, online booking · footer: seal band continuing contacts, large numbers left, link list right, legal line · imagery: client photos · signature: the family arc, four nested arcs mapping the four patient routes, lit by the hovered route
+ * axes: cool-white/soft-grotesk/deep-teal · posture: full-palette · contrast: pass · fold: pass · v2.0.0 */
+/* Hallmark · pre-emit critique: P4 H4 E4 S5 R4 V4 · weakest: E (evidence), the clinic has no supplied photos of branches, so prices, hours and districts are set large instead of pictures */
+/* Hallmark · waive 39b · a.btn 56px and 72px at 1440 · concept.md: the number button is 56px (the number is the label, Fixel Display) and the home-visit call is the largest button of the page by design */
+/* Hallmark · waive 80 · figure.routes__schema · it is the labelled diagram of the four patient routes (role=img with a title), the concept signature, not an illustration */
+/* Hallmark · waive 23 · hero arches in #006B79 and #0096AA, about 25% of the 1280 fold · posture full-palette: the concentric arches are the brand field (concept.md: the logo arcs become the page system), drawn in the logo tones; the signal colour on controls stays small */
+/* Line 1 of this file is the Hallmark stamp (docs/process/hallmark.md), filled from design/concept.md. */
+
+@font-face {
+  font-family: "Fixel Display";
+  src: url("../assets/fonts/FixelDisplay-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fixel Text";
+  src: url("../assets/fonts/FixelText-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Fixel Text";
+  src: url("../assets/fonts/FixelText-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Client design tokens, only from design/concept.md (veon-concept: colors, fonts). */
+:root {
+  /* palette: paper, well, ink, muted, field, signal, signal hover, seal, seal soft, sand, rule */
+  --color-bg: #F8FBFB;
+  --color-well: #E4F2F3;
+  --color-text: #0B2A30;
+  --color-muted: #4A5F63;
+  --color-field: #0096AA;
+  --color-field-deep: #006B79; /* the same tone as the signal, used only as graphic field in the arcs */
+  --color-accent: #006B79;
+  --color-accent-ink: #006B79;
+  --color-accent-hover: #005A66;
+  --color-seal: #0A3A42;
+  --color-seal-soft: #A8D8DE;
+  --color-sand: #EAD9BF;
+  --color-rule: #C5DCDE;
+  --color-on-accent: var(--color-bg);
+  --color-on-seal: var(--color-bg);
+  --color-focus: var(--color-accent);
+
+  --font-display: "Fixel Display", system-ui, sans-serif;
+  --font-body: "Fixel Text", system-ui, sans-serif;
+
+  /* type scale x1.25 from 17px, six sizes */
+  --text-sm: 0.875rem;
+  --text-md: 1.0625rem;
+  --text-lead: 1.3125rem;
+  --text-title: clamp(1.5rem, 1.2rem + 1vw, 2rem);
+  --text-section: clamp(2rem, 1.45rem + 1.9vw, 3rem);
+  --text-display: clamp(2.5rem, 1.2rem + 5.2vw, 5.5rem);
+  --text-figure: clamp(2.5rem, 1.6rem + 2.6vw, 4rem);
+
+  /* spacing scale 4/8 */
+  --space-3xs: 2px;
+  --space-2xs: 4px;
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 40px;
+  --space-2xl: 64px;
+  --space-3xl: 96px;
+  --space-4xl: 144px;
+  --section-gap-s: clamp(64px, 4rem + 2.2vw, 96px);
+  --section-gap: clamp(96px, 5rem + 3.4vw, 144px);
+
+  --radius: 4px;
+  --radius-btn: 12px;
+  --radius-arc: 48px;
+  --control-h: 56px;
+
+  --ease-out: cubic-bezier(.2, .7, .2, 1);
+  --ease-in-out: cubic-bezier(.6, 0, .3, 1);
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+  --dur: 420ms;
+
+  --space: clamp(20px, 5vw, 120px);
+  --container: 1360px;
+  --header-h: 64px;
+  --bar-h: 64px;
+
+  --z-sticky: 200;
+  --z-nav: 300;
+  --z-tooltip: 600;
+}
+@media (min-width: 60rem) {
+  :root { --header-h: 76px; }
+}
